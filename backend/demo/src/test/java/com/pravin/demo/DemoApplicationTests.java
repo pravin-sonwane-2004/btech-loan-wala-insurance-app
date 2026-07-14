@@ -9,7 +9,6 @@ import com.pravin.demo.auth.TokenAuthorizationInterceptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import tools.jackson.databind.ObjectMapper;
 
 class DemoApplicationTests {
 
@@ -55,6 +54,6 @@ class DemoApplicationTests {
 		AuthTokenProperties properties = new AuthTokenProperties();
 		properties.setAdminToken("admin-token");
 		properties.setAgentToken("agent-token");
-		return new TokenAuthorizationInterceptor(properties, new ObjectMapper());
+		return new TokenAuthorizationInterceptor(properties);
 	}
 }
