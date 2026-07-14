@@ -104,13 +104,13 @@ Lead validation:
 
 The backend returns predictable HTTP status codes:
 
-| Status | Meaning |
-| --- | --- |
-| `400 Bad Request` | Invalid request body or failed validation |
-| `401 Unauthorized` | Missing or invalid token |
-| `403 Forbidden` | Agent tried to delete |
-| `404 Not Found` | Entity ID does not exist |
-| `409 Conflict` | Duplicate unique value, such as email or policy number |
+| Status             | Meaning                                                |
+| ------------------ | ------------------------------------------------------ |
+| `400 Bad Request`  | Invalid request body or failed validation              |
+| `401 Unauthorized` | Missing or invalid token                               |
+| `403 Forbidden`    | Agent tried to delete                                  |
+| `404 Not Found`    | Entity ID does not exist                               |
+| `409 Conflict`     | Duplicate unique value, such as email or policy number |
 
 The JSON error shape is:
 
