@@ -2,8 +2,7 @@ package com.pravin.demo.lead;
 
 import java.util.List;
 
-import com.pravin.demo.common.BadRequestException;
-import com.pravin.demo.common.NotFoundException;
+import com.pravin.demo.common.ApiException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -51,7 +50,7 @@ public class LeadService {
 
 	private SalesLead findLead(Long id) {
 		return leadRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Lead " + id + " was not found"));
+				.orElseThrow(() -> ApiException.notFound("Lead " + id + " was not found"));
 	}
 
 	private void apply(LeadRequest request, SalesLead lead) {
@@ -67,7 +66,7 @@ public class LeadService {
 		requireText(request.contactInfo(), "Contact info is required");
 		requireText(request.referralSource(), "Referral source is required");
 		if (request.leadStatus() == null) {
-			throw new BadRequestException("Lead status is required");
+			throw ApiException.badRequest("Lead status is required");
 		}
 		requireText(request.assignedAgentName(), "Assigned agent name is required");
 	}
@@ -92,7 +91,7 @@ public class LeadService {
 
 	private void requireText(String value, String message) {
 		if (!StringUtils.hasText(value)) {
-			throw new BadRequestException(message);
+			throw ApiException.badRequest(message);
 		}
 	}
 }

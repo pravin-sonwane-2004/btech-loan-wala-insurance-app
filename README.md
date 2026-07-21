@@ -1,120 +1,138 @@
 # Sawai Insurance Management System
 
-This project is a Java full stack assignment for an insurance agency workflow. It manages three main modules:
+## What is this project?
 
-- Customers
-- Insurance policies linked to customers
-- Sales leads
+A simple web app to manage insurance records. You can:
+- **Add, view, edit, and delete** customers
+- **Add, view, edit, and delete** insurance policies
+- **Add, view, edit, and delete** sales leads
 
-The backend is intentionally simple and explainable: controller, service, repository, entity, DTO. The frontend is a minimal Vite app written with vanilla JavaScript, HTML, and CSS flexbox.
+## Tech Stack (Simple Explanation)
 
-## Tech Stack
+| Layer | What it uses | Why |
+|---|---|---|
+| **Backend** | Java + Spring Boot | Handles all business logic and data |
+| **Database** | MySQL | Stores all records permanently |
+| **Frontend** | React + Vite | Shows the UI in the browser (components managed by React state) |
+| **Auth** | Custom token header | Secures the API |
 
-- Backend: Java 17, Spring Boot, Spring MVC, Spring Data JPA, Maven
-- Database: MySQL
-- Frontend: Vite, HTML, CSS, vanilla JavaScript
-- Security: Custom `X-Auth-Token` interceptor
-- Testing: JUnit tests for token authorization behavior
+---
+
+## How It Works (The Big Picture)
+
+```
+User clicks button in React app
+         |
+         v
+React calls fetch() to backend API
+(with X-Auth-Token header)
+         |
+         v
+Spring Boot checks if token is valid
+         |
+         v
+If valid -> Controller receives request
+         |
+         v
+Service does validation + business logic
+         |
+         v
+Repository reads/writes MySQL database
+         |
+         v
+JSON response sent back to React
+         |
+         v
+React re-renders with new data
+```
+
+---
 
 ## Project Structure
 
-```text
-backend/demo
-  src/main/java/com/pravin/demo
-    auth       Token based authorization
-    common     Shared errors and exception handling
-    config     CORS, interceptor, and Spring Security configuration
-    customer   Customer entity, DTOs, repository, service, controller
-    lead       Lead entity, DTOs, repository, service, controller
-    policy     Policy entity, DTOs, repository, service, controller
+```
+backend/demo/                        <-- All Java backend code
+  src/main/java/com/pravin/demo/
+    auth/                            <-- Token checking logic
+    common/                          <-- All error handling in just 2 files
+    config/                          <-- Setup for CORS + interceptors
+    customer/                        <-- Customer module
+    policy/                          <-- Policy module
+    lead/                            <-- Lead module
 
-frontend/my-react-app
-  src/main.js      Vanilla JavaScript UI and API calls
-  src/index.css    Minimal flexbox based styling
+frontend/my-react-app/               <-- React frontend (modular)
+  src/main.jsx                       <-- React entry point
+  src/App.jsx                        <-- Main component (state + logic)
+  src/api.js                         <-- API config and fetch helper
+  src/forms.jsx                      <-- Form fields for each module
+  src/tables.jsx                     <-- Table headers and rows
+  src/index.css                      <-- All styling
+  index.html                         <-- Main HTML page
+
+backend/demo/src/main/java/com/pravin/demo/export/
+  ExportController.java              <-- CSV download endpoint
 ```
 
-## How To Run
+---
 
-Start MySQL first. The backend uses this default URL:
+## How to Run
 
-```text
-jdbc:mysql://localhost:3306/sawai_insurance?createDatabaseIfNotExist=true
-```
+### Step 1: Start MySQL (Make sure MySQL is running)
 
-Run the backend:
-
-```powershell
+### Step 2: Run Backend
+```bash
 cd backend/demo
-$env:DB_USERNAME="root"
-$env:DB_PASSWORD="your_mysql_password"
+set DB_USERNAME=root
+set DB_PASSWORD=your_mysql_password
 .\mvnw.cmd spring-boot:run
 ```
 
-Run the frontend:
+The backend will start at: `http://localhost:8080`
 
-```powershell
+### Step 3: Run Frontend
+```bash
 cd frontend/my-react-app
-npm.cmd install
-npm.cmd run dev
+npm install
+npm run dev
 ```
 
-Open the Vite URL, usually:
+The frontend will start at: `http://localhost:5173`
 
-```text
-http://localhost:5173
+---
+
+## API Rules
+
+Every request must send this header:
+```
+X-Auth-Token: SAWAI_ADMIN_TOKEN_2026
 ```
 
-## Authentication Tokens
+| Role | Token | Can Delete? |
+|---|---|---|
+| ADMIN | `SAWAI_ADMIN_TOKEN_2026` | Yes |
+| AGENT | `SAWAI_AGENT_TOKEN_2026` | No (gets 403 error) |
 
-Every `/api/**` request must send this header:
+If token is missing or wrong → `401 Unauthorized`
 
-```text
-X-Auth-Token: token-value
-```
+---
 
-Default tokens:
+## The 3 Modules (Simple Explanation)
 
-| Role | Token |
-| --- | --- |
-| ADMIN | `SAWAI_ADMIN_TOKEN_2026` |
-| AGENT | `SAWAI_AGENT_TOKEN_2026` |
+### 1. Customers
+People who buy insurance. Fields: name, email, phone, DOB, status.
 
-Rules:
+### 2. Policies
+Insurance plans. Each policy belongs to one customer. Fields: policy number, type, premium, term, start date.
 
-- `ADMIN` can read, create, update, and delete.
-- `AGENT` can read, create, and update.
-- `AGENT` cannot delete. The backend returns `403 Forbidden`.
-- Missing or invalid token returns `401 Unauthorized`.
+### 3. Leads
+Potential customers who haven't bought yet. Fields: prospect name, contact info, source, status, assigned agent.
 
-## Main API Routes
+---
 
-| Module | Routes |
-| --- | --- |
-| Customers | `GET /api/customers`, `POST /api/customers`, `GET /api/customers/{id}`, `PUT /api/customers/{id}`, `DELETE /api/customers/{id}` |
-| Policies | `GET /api/policies`, `POST /api/policies`, `GET /api/policies/{id}`, `PUT /api/policies/{id}`, `DELETE /api/policies/{id}` |
-| Leads | `GET /api/leads`, `POST /api/leads`, `GET /api/leads/{id}`, `PUT /api/leads/{id}`, `DELETE /api/leads/{id}` |
+## Key Interview Points
 
-Search filters:
-
-- Customers: `GET /api/customers?search=term`
-- Policies: `GET /api/policies?search=term&customerId=1`
-- Leads: `GET /api/leads?search=term&status=NEW`
-
-## Verification
-
-Frontend:
-
-```powershell
-cd frontend/my-react-app
-npm.cmd run lint
-npm.cmd run build
-```
-
-Backend:
-
-```powershell
-cd backend/demo
-.\mvnw.cmd test
-```
-
-More explanation is available in [docs/INTERVIEW_EXPLANATION.md](docs/INTERVIEW_EXPLANATION.md) and [docs/API_REFERENCE.md](docs/API_REFERENCE.md).
+1. **Every module follows the same pattern**: Entity → Repository → Service → Controller
+2. **Token auth is done via Interceptor** (middleware that runs before every request)
+3. **Frontend is React** - uses `useState` and `useEffect` hooks, all logic in one component
+4. **AGENT can't delete** - this is enforced in the backend, not just the frontend
+5. **Email and policy number must be unique** (checked both in code and database)

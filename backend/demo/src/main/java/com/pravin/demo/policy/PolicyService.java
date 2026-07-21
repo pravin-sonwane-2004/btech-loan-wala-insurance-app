@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
-import com.pravin.demo.common.BadRequestException;
-import com.pravin.demo.common.ConflictException;
-import com.pravin.demo.common.NotFoundException;
+import com.pravin.demo.common.ApiException;
 import com.pravin.demo.customer.Customer;
 import com.pravin.demo.customer.CustomerRepository;
 import org.springframework.stereotype.Service;
@@ -58,7 +56,7 @@ public class PolicyService {
 
 	private Policy findPolicy(Long id) {
 		return policyRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Policy " + id + " was not found"));
+				.orElseThrow(() -> ApiException.notFound("Policy " + id + " was not found"));
 	}
 
 	private void apply(PolicyRequest request, Policy policy) {
@@ -75,19 +73,19 @@ public class PolicyService {
 		requireText(request.policyNumber(), "Policy number is required");
 		requireText(request.policyName(), "Policy name is required");
 		if (request.policyType() == null) {
-			throw new BadRequestException("Policy type is required");
+			throw ApiException.badRequest("Policy type is required");
 		}
 		if (request.premiumAmount() == null || request.premiumAmount().compareTo(BigDecimal.ZERO) <= 0) {
-			throw new BadRequestException("Premium amount must be greater than zero");
+			throw ApiException.badRequest("Premium amount must be greater than zero");
 		}
 		if (request.coverageTermMonths() == null || request.coverageTermMonths() <= 0) {
-			throw new BadRequestException("Coverage term must be greater than zero months");
+			throw ApiException.badRequest("Coverage term must be greater than zero months");
 		}
 		if (request.effectiveStartDate() == null) {
-			throw new BadRequestException("Effective start date is required");
+			throw ApiException.badRequest("Effective start date is required");
 		}
 		if (request.customerId() == null) {
-			throw new BadRequestException("Associated customer ID is required");
+			throw ApiException.badRequest("Associated customer ID is required");
 		}
 
 		findCustomer(request.customerId());
@@ -95,13 +93,13 @@ public class PolicyService {
 		policyRepository.findByPolicyNumberIgnoreCase(clean(request.policyNumber()))
 				.filter(policy -> !Objects.equals(policy.getId(), existingId))
 				.ifPresent(policy -> {
-					throw new ConflictException("Policy number already exists");
+					throw ApiException.conflict("Policy number already exists");
 				});
 	}
 
 	private Customer findCustomer(Long customerId) {
 		return customerRepository.findById(customerId)
-				.orElseThrow(() -> new NotFoundException("Customer " + customerId + " was not found"));
+				.orElseThrow(() -> ApiException.notFound("Customer " + customerId + " was not found"));
 	}
 
 	private PolicyResponse toResponse(Policy policy) {
@@ -128,7 +126,7 @@ public class PolicyService {
 
 	private void requireText(String value, String message) {
 		if (!StringUtils.hasText(value)) {
-			throw new BadRequestException(message);
+			throw ApiException.badRequest(message);
 		}
 	}
 }

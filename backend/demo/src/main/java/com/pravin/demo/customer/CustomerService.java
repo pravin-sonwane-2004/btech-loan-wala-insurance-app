@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import com.pravin.demo.common.BadRequestException;
-import com.pravin.demo.common.ConflictException;
-import com.pravin.demo.common.NotFoundException;
+import com.pravin.demo.common.ApiException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -57,7 +55,7 @@ public class CustomerService {
 
 	private Customer findCustomer(Long id) {
 		return customerRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Customer " + id + " was not found"));
+				.orElseThrow(() -> ApiException.notFound("Customer " + id + " was not found"));
 	}
 
 	private void apply(CustomerRequest request, Customer customer) {
@@ -75,22 +73,22 @@ public class CustomerService {
 		requireText(request.email(), "Email is required");
 		requireText(request.phoneNumber(), "Phone number is required");
 		if (!EMAIL_PATTERN.matcher(clean(request.email())).matches()) {
-			throw new BadRequestException("Email format is invalid");
+			throw ApiException.badRequest("Email format is invalid");
 		}
 		if (request.dateOfBirth() == null) {
-			throw new BadRequestException("Date of birth is required");
+			throw ApiException.badRequest("Date of birth is required");
 		}
 		if (request.dateOfBirth().isAfter(LocalDate.now())) {
-			throw new BadRequestException("Date of birth cannot be in the future");
+			throw ApiException.badRequest("Date of birth cannot be in the future");
 		}
 		if (request.accountStatus() == null) {
-			throw new BadRequestException("Account status is required");
+			throw ApiException.badRequest("Account status is required");
 		}
 
 		customerRepository.findByEmailIgnoreCase(clean(request.email()))
 				.filter(customer -> !Objects.equals(customer.getId(), existingId))
 				.ifPresent(customer -> {
-					throw new ConflictException("Email already belongs to another customer");
+					throw ApiException.conflict("Email already belongs to another customer");
 				});
 	}
 
@@ -115,7 +113,7 @@ public class CustomerService {
 
 	private void requireText(String value, String message) {
 		if (!StringUtils.hasText(value)) {
-			throw new BadRequestException(message);
+			throw ApiException.badRequest(message);
 		}
 	}
 }

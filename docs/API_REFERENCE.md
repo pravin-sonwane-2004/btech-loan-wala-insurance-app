@@ -161,3 +161,16 @@ Expected result:
 ```text
 403 Forbidden
 ```
+
+## Export CSV
+
+Download all records as a CSV file:
+
+```http
+GET /api/export
+X-Auth-Token: SAWAI_ADMIN_TOKEN_2026
+```
+
+This returns a CSV file with 3 sections: Customers, Policies, and Leads.  
+The frontend has a "Download CSV" button in the top bar that calls this endpoint.
+```

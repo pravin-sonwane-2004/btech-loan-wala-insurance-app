@@ -1,6 +1,5 @@
 package com.pravin.demo.auth;
 
-import java.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpMethod;
@@ -8,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.io.IOException;
 
 @Component
 public class TokenAuthorizationInterceptor implements HandlerInterceptor {
@@ -44,6 +45,7 @@ public class TokenAuthorizationInterceptor implements HandlerInterceptor {
 	private void writeError(HttpServletResponse response, HttpStatus status, String message) throws IOException {
 		response.setStatus(status.value());
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//		response.setContentType("application/json");
 		response.getWriter().write("{\"message\":\"" + message + "\"}");
 	}
 }

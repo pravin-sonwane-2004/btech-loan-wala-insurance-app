@@ -14,34 +14,29 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-	@ExceptionHandler(BadRequestException.class)
-	public ResponseEntity<ApiError> handleBadRequest(BadRequestException exception, HttpServletRequest request) {
-		return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
-	}
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiError> handleApiException(ApiException exception, HttpServletRequest request) {
+        return build(HttpStatus.valueOf(exception.getHttpStatus()), exception.getMessage(), request);
+    }
 
-	@ExceptionHandler({
-			HttpMessageNotReadableException.class,
-			MethodArgumentTypeMismatchException.class
-	})
-	public ResponseEntity<ApiError> handleInvalidRequest(Exception exception, HttpServletRequest request) {
-		return build(HttpStatus.BAD_REQUEST, "Request payload or parameter value is invalid", request);
-	}
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class
+    })
+    public ResponseEntity<ApiError> handleInvalidRequest(Exception exception, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "Request payload or parameter value is invalid", request);
+    }
 
-	@ExceptionHandler(NotFoundException.class)
-	public ResponseEntity<ApiError> handleNotFound(NotFoundException exception, HttpServletRequest request) {
-		return build(HttpStatus.NOT_FOUND, exception.getMessage(), request);
-	}
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleConflict(Exception exception, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, exception.getMessage(), request);
+    }
 
-	@ExceptionHandler({
-			ConflictException.class,
-			DataIntegrityViolationException.class
-	})
-	public ResponseEntity<ApiError> handleConflict(Exception exception, HttpServletRequest request) {
-		return build(HttpStatus.CONFLICT, exception.getMessage(), request);
-	}
+    private ResponseEntity<ApiError> build(HttpStatus status, String message, HttpServletRequest request) {
+        return ResponseEntity.status(status)
+                .body(new ApiError(Instant.now(), status.value(), status.getReasonPhrase(), message, request.getRequestURI()));
+    }
 
-	private ResponseEntity<ApiError> build(HttpStatus status, String message, HttpServletRequest request) {
-		return ResponseEntity.status(status)
-				.body(new ApiError(Instant.now(), status.value(), status.getReasonPhrase(), message, request.getRequestURI()));
-	}
+    record ApiError(Instant timestamp, int status, String error, String message, String path) {
+    }
 }
