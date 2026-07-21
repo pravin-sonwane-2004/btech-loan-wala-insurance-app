@@ -2,9 +2,9 @@
 ║              SAWAI INSURANCE MANAGEMENT SYSTEM — FULL DOCUMENTATION         ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
-================================================================================
-1. PROJECT OVERVIEW
-================================================================================
+# SAWAI Insurance Management System
+
+## 1. Project Overview
 
 A full-stack web application for managing insurance records. It provides CRUD
 (Create, Read, Update, Delete) operations for three core business modules:
@@ -17,9 +17,8 @@ The backend is a REST API built with Java + Spring Boot. The frontend is a
 single-page React app. Authentication uses a custom token-based system (no
 passwords, no login page).
 
-================================================================================
-2. TECH STACK
-================================================================================
+
+## 2. TECH STACK
 
 ┌──────────────┬────────────────────────────┬──────────────────────────────────┐
 │ Layer        │ Technology                 │ Purpose                          │
@@ -33,9 +32,8 @@ passwords, no login page).
 │              │ npm (frontend)             │                                  │
 └──────────────┴────────────────────────────┴──────────────────────────────────┘
 
-================================================================================
-3. REQUEST FLOW (How a Request Travels Through the System)
-================================================================================
+
+## 3. REQUEST FLOW (How a Request Travels Through the System)
 
     ┌─────────────────────────────────────────────────────────────────────┐
     │                        CLIENT (Browser / Postman)                   │
@@ -138,9 +136,8 @@ passwords, no login page).
     │              React re-renders UI with new data                      │
     └─────────────────────────────────────────────────────────────────────┘
 
-================================================================================
-4. MODULE ARCHITECTURE (The 4-Layer Pattern)
-================================================================================
+
+## 4. MODULE ARCHITECTURE (The 4-Layer Pattern)
 
 Every module (Customer, Policy, Lead) follows the EXACT same structure:
 
@@ -155,8 +152,8 @@ Every module (Customer, Policy, Lead) follows the EXACT same structure:
     │   Also: Request DTO (input) and Response DTO (output) per module   │
     └─────────────────────────────────────────────────────────────────────┘
 
-4.1 Layer Details
-──────────────────
+
+## 4. 1 Layer Details
 
   LAYER 1 — Entity (e.g. Customer.java, Policy.java, SalesLead.java)
   • A Java class annotated with @Entity, maps to a MySQL table
@@ -193,12 +190,11 @@ Every module (Customer, Policy, Lead) follows the EXACT same structure:
   • Example: PolicyResponse includes customerName (computed), but the
     database only stores customerId
 
-================================================================================
-5. AUTHENTICATION SYSTEM
-================================================================================
 
-5.1 How It Works
-─────────────────
+## 5. AUTHENTICATION SYSTEM
+
+
+## 5. 1 How It Works
 
 The app uses a custom token-based authentication (NOT Spring Security).
 Every API request must include the header:
@@ -208,8 +204,8 @@ Every API request must include the header:
 The TokenAuthorizationInterceptor (a HandlerInterceptor) checks this header
 BEFORE the request reaches any controller method.
 
-5.2 Token Configuration (in application.properties)
-────────────────────────────────────────────────────
+
+## 5. 2 Token Configuration (in application.properties)
 
     app.auth.admin-token = SAWAI_ADMIN_TOKEN_2026   (default)
     app.auth.agent-token = SAWAI_AGENT_TOKEN_2026   (default)
@@ -217,8 +213,8 @@ BEFORE the request reaches any controller method.
 These can be overridden via environment variables:
     ADMIN_AUTH_TOKEN  and  AGENT_AUTH_TOKEN
 
-5.3 Roles and Permissions
-──────────────────────────
+
+## 5. 3 Roles and Permissions
 
     ┌──────────┬──────────────────────────────┬──────────────────────────────┐
     │ Role     │ Token                        │ Can Delete?                  │
@@ -227,33 +223,38 @@ These can be overridden via environment variables:
     │ AGENT    │ SAWAI_AGENT_TOKEN_2026       │ NO  (returns 403 Forbidden)  │
     └──────────┴──────────────────────────────┴──────────────────────────────┘
 
-5.4 Auth Flow (Step by Step)
-─────────────────────────────
+
+## 5. 4 Auth Flow (Step by Step)
 
     1. Client sends request with X-Auth-Token header
-    2. Interceptor.preHandle() runs
-    3. Calls authTokenProperties.resolveRole(token)
+
+## 2. Interceptor.preHandle() runs
+
+## 3. Calls authTokenProperties.resolveRole(token)
        → Compares token against admin-token and agent-token
        → Returns Optional<UserRole> (ADMIN, AGENT, or empty)
-    4. If token is missing or doesn't match either → 401 Unauthorized
-    5. If token matches AGENT and HTTP method is DELETE → 403 Forbidden
-    6. If valid → stores role in request attribute, returns true (continue)
-    7. Controller method executes normally
 
-5.5 Key Files
-─────────────
+## 4. If token is missing or doesn't match either → 401 Unauthorized
+
+## 5. If token matches AGENT and HTTP method is DELETE → 403 Forbidden
+
+## 6. If valid → stores role in request attribute, returns true (continue)
+
+## 7. Controller method executes normally
+
+
+## 5. 5 Key Files
 
     • TokenAuthorizationInterceptor.java  — The interceptor logic
     • AuthTokenProperties.java            — Reads tokens from config
     • UserRole.java                       — Enum: ADMIN, AGENT
     • WebConfig.java                      — Registers interceptor for /api/**
 
-================================================================================
-6. DATABASE SCHEMA
-================================================================================
 
-6.1 Tables
-──────────
+## 6. DATABASE SCHEMA
+
+
+## 6. 1 Tables
 
   TABLE: customers
   ┌────────────────┬──────────────┬──────────────────────────────────────────┐
@@ -294,8 +295,8 @@ These can be overridden via environment variables:
   │ assigned_agent_name│ VARCHAR(120)│ NOT NULL                              │
   └───────────────────┴──────────────┴───────────────────────────────────────┘
 
-6.2 Relationships
-─────────────────
+
+## 6. 2 Relationships
 
     customers (1) ────────── (N) insurance_policies
     • One customer can have many policies
@@ -304,22 +305,21 @@ These can be overridden via environment variables:
 
     leads are independent (no foreign key relationships)
 
-6.3 DDL Auto-Creation
-──────────────────────
+
+## 6. 3 DDL Auto-Creation
 
     spring.jpa.hibernate.ddl-auto = update
 
     Hibernate automatically creates/updates tables based on @Entity classes.
     No manual SQL scripts needed. Tables are created on first run.
 
-================================================================================
-7. API ENDPOINTS
-================================================================================
+
+## 7. API ENDPOINTS
 
 All endpoints require:  X-Auth-Token: <valid_token>
 
-7.1 Customers  (base: /api/customers)
-──────────────────────────────────────
+
+## 7. 1 Customers  (base: /api/customers)
 
     METHOD  URL                     DESCRIPTION           AUTH
     ──────  ─────────────────────── ────────────────────  ─────────────
@@ -353,8 +353,8 @@ All endpoints require:  X-Auth-Token: <valid_token>
       "accountStatus": "ACTIVE"
     }
 
-7.2 Policies  (base: /api/policies)
-────────────────────────────────────
+
+## 7. 2 Policies  (base: /api/policies)
 
     METHOD  URL                    DESCRIPTION           AUTH
     ──────  ────────────────────── ────────────────────  ─────────────
@@ -392,8 +392,8 @@ All endpoints require:  X-Auth-Token: <valid_token>
       "customerName": "Aarav Sharma"
     }
 
-7.3 Leads  (base: /api/leads)
-──────────────────────────────
+
+## 7. 3 Leads  (base: /api/leads)
 
     METHOD  URL                 DESCRIPTION           AUTH
     ──────  ─────────────────── ────────────────────  ─────────────
@@ -426,8 +426,8 @@ All endpoints require:  X-Auth-Token: <valid_token>
       "assignedAgentName": "Rohit Agent"
     }
 
-7.4 Export CSV  (base: /api/export)
-────────────────────────────────────
+
+## 7. 4 Export CSV  (base: /api/export)
 
     METHOD  URL             DESCRIPTION                    AUTH
     ──────  ─────────────── ─────────────────────────────  ─────────────
@@ -443,21 +443,19 @@ All endpoints require:  X-Auth-Token: <valid_token>
       === LEADS ===
       ID,Prospect Name,Contact Info,Referral Source,Status,Assigned Agent
 
-================================================================================
-8. ENUMS (Allowed Values)
-================================================================================
+
+## 8. ENUMS (Allowed Values)
 
   AccountStatus:  ACTIVE, INACTIVE, SUSPENDED
   PolicyType:     HEALTH, LIFE, AUTO, HOME, BUSINESS, TRAVEL
   LeadStatus:     NEW, CONTACTED, QUALIFIED, CONVERTED, LOST
   UserRole:       ADMIN, AGENT
 
-================================================================================
-9. VALIDATION RULES
-================================================================================
 
-9.1 Customer Validation (in CustomerService.java)
-──────────────────────────────────────────────────
+## 9. VALIDATION RULES
+
+
+## 9. 1 Customer Validation (in CustomerService.java)
 
   • firstName, lastName, email, phoneNumber, dateOfBirth, accountStatus
     → ALL required (cannot be null/blank)
@@ -467,8 +465,8 @@ All endpoints require:  X-Auth-Token: <valid_token>
   • All text fields are trimmed of whitespace
   • Email is converted to lowercase before saving
 
-9.2 Policy Validation (in PolicyService.java)
-──────────────────────────────────────────────
+
+## 9. 2 Policy Validation (in PolicyService.java)
 
   • policyNumber, policyName, policyType, premiumAmount, coverageTermMonths,
     effectiveStartDate, customerId → ALL required
@@ -478,16 +476,15 @@ All endpoints require:  X-Auth-Token: <valid_token>
   • The referenced customerId must exist in the database
   • Policy number is converted to UPPERCASE
 
-9.3 Lead Validation (in LeadService.java)
-──────────────────────────────────────────
+
+## 9. 3 Lead Validation (in LeadService.java)
 
   • prospectName, contactInfo, referralSource, leadStatus, assignedAgentName
     → ALL required
   • No uniqueness constraints (duplicate leads are allowed)
 
-================================================================================
-10. ERROR HANDLING
-================================================================================
+
+## 10. ERROR HANDLING
 
 All errors return a consistent JSON format:
 
@@ -499,8 +496,8 @@ All errors return a consistent JSON format:
       "path": "/api/customers"
     }
 
-10.1 HTTP Status Codes
-───────────────────────
+
+## 10. 1 HTTP Status Codes
 
     ┌────────┬──────────────────────────┬────────────────────────────────────┐
     │ Status │ Meaning                  │ When it occurs                     │
@@ -513,8 +510,8 @@ All errors return a consistent JSON format:
     │ 409    │ Conflict                 │ Duplicate email or policy number   │
     └────────┴──────────────────────────┴────────────────────────────────────┘
 
-10.2 Error Handling Mechanism
-──────────────────────────────
+
+## 10. 2 Error Handling Mechanism
 
   • ApiException.java — Custom runtime exception with HTTP status code
     → Static factory methods: badRequest(), notFound(), conflict()
@@ -523,12 +520,11 @@ All errors return a consistent JSON format:
       MethodArgumentTypeMismatchException, DataIntegrityViolationException
   • TokenAuthorizationInterceptor — Handles 401 and 403 directly
 
-================================================================================
-11. FRONTEND (React)
-================================================================================
 
-11.1 Structure
-──────────────
+## 11. FRONTEND (React)
+
+
+## 11. 1 Structure
 
     frontend/my-react-app/
     ├── index.html              ← Main HTML page (has <div id="root">)
@@ -542,8 +538,8 @@ All errors return a consistent JSON format:
         ├── tables.jsx          ← Table components for displaying data
         └── index.css           ← All styling
 
-11.2 How It Works
-─────────────────
+
+## 11. 2 How It Works
 
   1. App.jsx uses useState hooks to manage:
      • currentModule  — Which tab is active (customers/policies/leads)
@@ -553,9 +549,11 @@ All errors return a consistent JSON format:
      • editingId      — ID of record being edited (null = creating new)
      • message        — Status message to display
 
-  2. useEffect on mount → calls api() to fetch all data from backend
 
-  3. When user interacts:
+## 2. useEffect on mount → calls api() to fetch all data from backend
+
+
+## 3. When user interacts:
      • Click tab → switch module → fetch that module's data
      • Fill form → update formData state
      • Click Save → POST or PUT to backend → refresh list
@@ -563,13 +561,14 @@ All errors return a consistent JSON format:
      • Click Delete → DELETE to backend → refresh list
      • Type search → fetch with ?search= parameter
 
-  4. api() helper function:
+
+## 4. api() helper function:
      • Adds X-Auth-Token header to every request
      • Handles JSON parsing
      • Returns parsed data or throws error
 
-11.3 API Base URL Configuration
-────────────────────────────────
+
+## 11. 3 API Base URL Configuration
 
   The frontend calls the backend directly using a hardcoded URL in api.js:
     API_BASE = 'http://localhost:8080'
@@ -579,9 +578,8 @@ All errors return a consistent JSON format:
   CORS is configured in the backend (WebConfig.java) to allow requests from
   http://localhost:5173 (the Vite dev server).
 
-================================================================================
-12. SEED DATA
-================================================================================
+
+## 12. SEED DATA
 
 No dedicated seed data script is included in this repository.
 To populate the database with sample data, you can:
@@ -591,12 +589,11 @@ To populate the database with sample data, you can:
   • Write your own automation script that calls the API endpoints
     using the admin token: SAWAI_ADMIN_TOKEN_2026
 
-================================================================================
-13. CONFIGURATION
-================================================================================
 
-13.1 application.properties (backend/demo/src/main/resources/)
-───────────────────────────────────────────────────────────────
+## 13. CONFIGURATION
+
+
+## 13. 1 application.properties (backend/demo/src/main/resources/)
 
     # Server
     spring.application.name = sawai-insurance-management
@@ -619,8 +616,8 @@ To populate the database with sample data, you can:
     # CORS (frontend URLs allowed to call the API)
     app.cors.allowed-origins = ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
 
-13.2 Environment Variables (Optional Overrides)
-────────────────────────────────────────────────
+
+## 13. 2 Environment Variables (Optional Overrides)
 
     Variable              Default Value
     ────────────────────  ─────────────────────────────
@@ -632,19 +629,18 @@ To populate the database with sample data, you can:
     AGENT_AUTH_TOKEN      SAWAI_AGENT_TOKEN_2026
     CORS_ALLOWED_ORIGINS  http://localhost:5173,http://127.0.0.1:5173
 
-================================================================================
-14. HOW TO RUN THE PROJECT
-================================================================================
 
-14.1 Prerequisites
-──────────────────
+## 14. HOW TO RUN THE PROJECT
+
+
+## 14. 1 Prerequisites
 
   • Java 17+ installed
   • MySQL 8+ installed and running
   • Node.js 18+ installed (for frontend)
 
-14.2 Step 1: Create Database
-─────────────────────────────
+
+## 14. 2 Step 1: Create Database
 
   MySQL will auto-create the database if it doesn't exist
   (due to createDatabaseIfNotExist=true in the JDBC URL).
@@ -652,8 +648,8 @@ To populate the database with sample data, you can:
   Or manually:
     CREATE DATABASE sawai_insurance;
 
-14.3 Step 2: Start Backend
-───────────────────────────
+
+## 14. 3 Step 2: Start Backend
 
     cd backend/demo
     set DB_USERNAME=root
@@ -662,14 +658,14 @@ To populate the database with sample data, you can:
 
   Backend starts at:  http://localhost:8080
 
-14.4 Step 3: (Optional) Seed Data
-──────────────────────────────────
+
+## 14. 4 Step 3: (Optional) Seed Data
 
   No seed script is included. Use the frontend UI or Postman/curl to
   add sample data via the API endpoints listed in Section 7.
 
-14.5 Step 4: Start Frontend
-────────────────────────────
+
+## 14. 5 Step 4: Start Frontend
 
     cd frontend/my-react-app
     npm install
@@ -677,8 +673,8 @@ To populate the database with sample data, you can:
 
   Frontend starts at:  http://localhost:5173
 
-14.6 Step 5: Use the App
-─────────────────────────
+
+## 14. 6 Step 5: Use the App
 
   • Open http://localhost:5173 in a browser
   • Select role (ADMIN or AGENT) from the dropdown
@@ -686,9 +682,8 @@ To populate the database with sample data, you can:
   • Create, edit, search, and delete records
   • Download CSV export from the top bar
 
-================================================================================
-15. PROJECT FILE MAP
-================================================================================
+
+## 15. PROJECT FILE MAP
 
     backend/
     ├── doc.txt                          ← This documentation file
@@ -753,12 +748,11 @@ To populate the database with sample data, you can:
     ├── API_REFERENCE.md             ← API endpoint examples
     └── INTERVIEW_EXPLANATION.md     ← Interview preparation guide
 
-================================================================================
-16. KEY DESIGN DECISIONS
-================================================================================
 
-  16.1 Why 4-Layer Architecture?
-  ──────────────────────────────
+## 16. KEY DESIGN DECISIONS
+
+
+## 16. 1 Why 4-Layer Architecture?
   Separation of Concerns. Each layer has ONE responsibility:
   • Entity = database shape
   • Repository = database queries
@@ -767,46 +761,45 @@ To populate the database with sample data, you can:
   If validation rules change → only modify Service.
   If database changes → only modify Repository.
 
-  16.2 Why Custom Token Auth Instead of Spring Security?
-  ──────────────────────────────────────────────────────
+
+## 16. 2 Why Custom Token Auth Instead of Spring Security?
   The assignment required custom header-based authentication.
   A HandlerInterceptor is simpler than Spring Security for this case
   (just checking one header value). No need for UserDetailsService,
   SecurityFilterChain, or password encoding.
 
-  16.3 Why DTOs (Request/Response Records)?
-  ─────────────────────────────────────────
+
+## 16. 3 Why DTOs (Request/Response Records)?
   The API contract is separate from the database schema.
   Example: PolicyResponse includes customerName (computed from Customer
   entity), but the database only stores customerId. This keeps the API
   flexible without changing the database.
 
-  16.4 Why Java Records?
-  ──────────────────────
+
+## 16. 4 Why Java Records?
   Records automatically generate: constructor, getters, equals(), hashCode(),
   toString(). Less boilerplate code compared to traditional classes.
 
-  16.5 Why @Transactional?
-  ────────────────────────
+
+## 16. 5 Why @Transactional?
   Ensures data consistency. If an operation fails mid-way, the database
   rolls back to its previous state. No partial saves or corrupted data.
 
-  16.6 Why Validation in Service Layer?
-  ─────────────────────────────────────
+
+## 16. 6 Why Validation in Service Layer?
   Business rules belong in the Service, not the Controller. The Controller
   just passes data to the Service. If validation rules change, only one
   place needs modification. Also, validation is guaranteed regardless of
   how the Service is called (e.g., from other services).
 
-  16.7 Why Backend-Enforced Security?
-  ───────────────────────────────────
+
+## 16. 7 Why Backend-Enforced Security?
   Security is in the backend, not just the frontend. Even if someone uses
   Postman or curl to send a DELETE request with an AGENT token, the backend
   still blocks it. The frontend is never trusted.
 
-================================================================================
-17. ENUM REFERENCE (Quick Lookup)
-================================================================================
+
+## 17. ENUM REFERENCE (Quick Lookup)
 
   ┌──────────────────┬──────────────────────────────────────────────────────┐
   │ Enum             │ Values                                               │
@@ -816,7 +809,3 @@ To populate the database with sample data, you can:
   │ LeadStatus       │ NEW, CONTACTED, QUALIFIED, CONVERTED, LOST           │
   │ UserRole         │ ADMIN, AGENT                                         │
   └──────────────────┴──────────────────────────────────────────────────────┘
-
-================================================================================
-END OF DOCUMENTATION
-================================================================================
